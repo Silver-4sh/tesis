@@ -187,8 +187,8 @@ if IS_PRODUCTION:
         EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
         DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-        # Obligatorio para evitar el error 502 por bloqueo de Gunicorn
         EMAIL_TIMEOUT = 10
+
 else:
     # En desarrollo local: Los correos aparecen en la terminal de PyCharm
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

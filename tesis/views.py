@@ -80,6 +80,7 @@ class UserCreationView(UserPassesTestMixin, CreateView):
                 body=plain_message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[user.email],
+
             )
             mail.attach_alternative(html_message, "text/html")
             mail.send(fail_silently=False)
