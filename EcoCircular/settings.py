@@ -33,9 +33,10 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-debug-key-123')
 DEBUG = os.getenv('RAILWAY_ENVIRONMENT') is None
 
 # Permitir todos los hosts en Railway, o definir específicamente
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*'] if not DEBUG else ['localhost', '127.0.0.1']
 
 # Application definition
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -135,15 +136,13 @@ CSRF_TRUSTED_ORIGINS = [
 
 # --- ARCHIVOS ESTÁTICOS Y MEDIA ---
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static', ]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Configuración específica para v3
-# 0.5 es el umbral estándar: si el usuario puntúa menos, se considera bot.
 RECAPTCHA_V3_ACTION = 'registration'
 RECAPTCHA_V3_THRESHOLD = 0.5
 RECAPTCHA_PUBLIC_KEY = '6Le3oq4sAAAAADc8bwEaKHE1C31YV8kcw3q811aw'
@@ -154,42 +153,29 @@ AUTH_USER_MODEL = 'tesis.CustomUser'
 
 PASSWORD_RESET_TIMEOUT = 259200
 
-# Reconozcer el protocolo HTTPS a través del proxy.
+# Reconocer el protocolo HTTPS a través del proxy.
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
 
 IS_PRODUCTION = os.getenv('RAILWAY_ENVIRONMENT') is not None
 
 if IS_PRODUCTION:
-    if IS_PRODUCTION:
-        LOGGING = {
-            'version': 1,
-            'disable_existing_loggers': False,
-            'handlers': {
-                'console': {
-                    'class': 'logging.StreamHandler',
-                },
-            },
-            'root': {
-                'handlers': ['console'],
-                'level': 'INFO',
-            },
-        }
-        # Configuración de Correo para Railway
-        EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-        EMAIL_HOST = 'smtp.gmail.com'
-        EMAIL_PORT = 465
-        EMAIL_USE_TLS = False
-        EMAIL_USE_SSL = True
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-        # ESTO ES LO QUE FALTA: Conectar con las variables de Railway
-        EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-        EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-        DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
-        EMAIL_TIMEOUT = 10
-
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 else:
-    # En desarrollo local: Los correos aparecen en la terminal de PyCharm
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     DEFAULT_FROM_EMAIL = 'testing@ecocircular.local'
+
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
