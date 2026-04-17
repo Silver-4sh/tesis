@@ -1,0 +1,12 @@
+{% autoescape off %}
+    Hola {{ user.username }},
+
+    Gracias por registrarte en nuestra plataforma. Para completar tu registro y verificar tu cuenta, por favor haz clic en el siguiente enlace:
+
+    {{ protocol }}://{{ domain }}{% url 'verify_account' uidb64=uid token=token %}
+
+    Este enlace expirará en breve por razones de seguridad.
+
+    Saludos,
+    El equipo de {{ site_name|default:"CITMA" }}
+{% endautoescape %}

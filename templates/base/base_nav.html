@@ -1,0 +1,39 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block body %}
+    <div class="container-fluid" style="height: 100vh;">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-body-tertiary sidebar border-end p-3 vh-100">
+                <div class="position-sticky">
+                    <h5 class="text-muted mb-3 px-3">Navegación</h5>
+                    <ul class="nav nav-pills flex-column">
+
+                        <li class="nav-item">
+                            <a href="{% url 'resource_read' 'public' %}"
+                               class="nav-link {% if mode == 'public' %}active{% endif %}">
+                                <i class="bi bi-globe me-2"></i> Mercado Público
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'resource_read' 'private' %}"
+                               class="nav-link {% if mode == 'private' %}active{% endif %}">
+                                <i class="bi bi-lock me-2"></i> Mis Recursos
+                            </a>
+                        </li>
+
+                        <li class="nav-item mt-4">
+                            <a href="{% url 'home' %}" class="nav-link text-danger">
+                                <i class="bi bi-arrow-left me-2"></i> Inicio
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            {% block main %} {% endblock main %}
+
+        </div>
+    </div>
+
+{% endblock body %}

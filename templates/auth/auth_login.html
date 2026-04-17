@@ -1,0 +1,64 @@
+{% extends "base/base.html" %}
+{% load static %}
+{% load honeypot %}
+
+{% block body %}
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+
+                <!-- Volver -->
+                <div class="my-3">
+                    <a href="{% url 'home' %}" class="text-decoration-none text-muted">
+                        <i class="bi bi-arrow-left"></i> Volver al inicio
+                    </a>
+                </div>
+
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h3>Iniciar Sesión</h3>
+                    </div>
+
+                    <div class="card-body px-5">
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+
+                            {% render_honeypot_field "full_name_field" %}
+
+                            {% for field in form %}
+                                {% if field.name == 'captcha' %}
+                                    {{ field }}
+                                {% else %}
+                                    <div class="mb-3 position-relative">
+                                        <label class="form-label font-weight-bold">{{ field.label }}</label>
+
+                                        {% if "password" in field.name %}
+                                            <div class="input-group has-validation">
+                                                {{ field }}
+                                                <button class="btn btn-outline-secondary toggle-password" type="button">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                            </div>
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+
+                            <div class="text-center mt-4">
+                                <button type="button" id="btn-submit-manual" class="btn btn-primary px-5">
+                                    Acceder
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-footer text-center">
+                        <small>¿No tienes cuenta? <a href="{% url 'user-creation' %}">Créala aquí</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body %}

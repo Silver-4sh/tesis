@@ -1,0 +1,22 @@
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Entorno Virtual
+.venv/
+env/
+venv/
+
+# IDEs (PyCharm)
+.idea/
+
+# Variables de entorno (CRÍTICO)
+.env
+
+# Python compilado
+__pycache__/
+*.py[cod]
+*$py.class

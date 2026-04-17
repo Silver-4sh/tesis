@@ -1,0 +1,73 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block body %}
+    <div class="container-fluid" style="height: 100vh;">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-body-tertiary sidebar border-end p-3 vh-100">
+                <div class="position-sticky">
+                    <h5 class="text-muted mb-3 px-3">Panel de Control</h5>
+                    <ul class="nav nav-pills flex-column">
+                        <li class="nav-item">
+                            <span class="nav-link disabled fw-bold text-uppercase small text-secondary">General</span>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'statistics' %}" class="nav-link shadow-sm">
+                                <i class="bi bi-calculator me-2"></i> Estadísticas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'graphs' %}" class="nav-link shadow-sm">
+                                <i class="bi bi-graph-up me-2"></i> Gráficos
+                            </a>
+                        </li>
+
+                        <li class="nav-item mt-3">
+                            <span class="nav-link disabled fw-bold text-uppercase small text-secondary">Usuarios</span>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'user_list' %}" class="nav-link">
+                                <i class="bi bi-people me-2"></i> Lista de Usuarios
+                            </a>
+                        </li>
+
+                        <li class="nav-item mt-3">
+                            <span class="nav-link disabled fw-bold text-uppercase small text-secondary">Recursos</span>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'resource_read' 'admin' %}" class="nav-link">
+                                <i class="bi bi-shield-lock me-2"></i> Gestión de Mercado
+                            </a>
+                        </li>
+
+                        <li class="nav-item mt-3">
+                            <span class="nav-link disabled fw-bold text-uppercase small text-secondary">Registros</span>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'auth_audit_log' %}" class="nav-link">
+                                <i class="bi bi-shield-lock me-2"></i> Autenticación
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'resource_audit_log' %}" class="nav-link">
+                                <i class="bi bi-shield-lock me-2"></i> Recursos
+                            </a>
+                        </li>
+
+                        <hr class="my-4">
+
+                        <li class="nav-item">
+                            <a href="{% url 'home' %}" class="nav-link text-danger">
+                                <i class="bi bi-arrow-left-circle me-2"></i> Inicio
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            {% block main %} {% endblock main %}
+
+        </div>
+    </div>
+
+{% endblock body %}

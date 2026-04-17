@@ -1,0 +1,1 @@
+web: python manage.py collectstatic --noinput --clear && gunicorn EcoCircular.wsgi

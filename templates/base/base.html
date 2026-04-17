@@ -1,0 +1,72 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+
+    <!-- Title block -->
+    {% block title %}
+        <title>Título</title>
+    {% endblock title %}
+
+    <!-- Meta section -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="description" content=""/>
+    <meta name="keywords" content="">
+    <meta name="author" content="CITMA"/>
+
+    <!-- Favicon section -->
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+
+    <!-- Styles section (css) -->
+    <link href="{% static 'css/bootstrap.css' %}" rel="stylesheet"/>
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet"/>
+    <link href="{% static 'fonts/bootstrap-icons.css' %}" rel="stylesheet"/>
+
+
+    <script>
+        // Run this immediately to prevent flashing
+        (function () {
+            const savedTheme = localStorage.getItem('bsTheme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-bs-theme', theme);
+        })();
+    </script>
+</head>
+
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- Body block -->
+        {% block body %} {% endblock body %}
+
+    </div>
+</div>
+
+<div id="toastPlacement" class="toast-container position-fixed p-3"
+     style="z-index: 1200; top: 50px; right: 30px; width: 350px;">
+
+    {# 1. CAPTURA MENSAJES DEL SISTEMA (Éxito, Error de duplicados, etc.) #}
+    {% if messages %}
+        {% for message in messages %}
+            <span class="js-toast-source"
+                  data-message="{{ message|escapejs }}"
+                  data-type="{{ message.tags }}"></span>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<!-- Script section (js) -->
+<script src="{% static 'js/bootstrap.bundle.js' %}"></script>
+<script src="{% static 'js/theme.js' %}"></script>
+<script src="{% static 'js/auth.js' %}"></script>
+<script src="{% static 'js/chart.js' %}"></script>
+<script src="{% static 'js/notifications.js' %}"></script>
+
+</body>
+</html>
