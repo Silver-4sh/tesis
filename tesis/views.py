@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import render, redirect
@@ -17,7 +17,7 @@ from django_ratelimit.decorators import ratelimit
 from honeypot.decorators import check_honeypot
 
 from EcoCircular import settings
-from .forms import CustomUserCreationForm, CustomAuthenticationForm
+from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomPasswordResetForm, CustomSetPasswordForm
 from .models import CustomUser, AuthLogs
 
 
@@ -149,6 +149,24 @@ class UserCreationView(AuthSecurityMixin, UserPassesTestMixin, AuthLogMixin, Aut
         return super().form_invalid(form)
 
 
+class UserLoginView(AuthSecurityMixin, UserPassesTestMixin, AuthLogMixin, LoginView):
+    """Vista de Login utilizando CBV y Mixins de auditoría."""
+    form_class = CustomAuthenticationForm
+    template_name = 'auth/auth_login.html'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.auth_log(self.request.user, 'login', 'Inicio de sesión exitoso.')
+        messages.success(self.request, f"Bienvenido {self.request.user.username}.")
+        return response
+
+    def form_invalid(self, form):
+        username_attempted = form.data.get('username', 'Anónimo')
+        self.auth_log(None, 'login', 'Credenciales inválidas.', manual_username=username_attempted)
+        messages.error(self.request, "Credenciales inválidas.", extra_tags='danger')
+        return super().form_invalid(form)
+
+
 class LogoutView(LoginRequiredMixin, AuthLogMixin, View):
     login_url = 'home'
 
@@ -167,7 +185,6 @@ class VerifyAccountView(AuthSecurityMixin, UserPassesTestMixin, AuthLogMixin, Vi
         except:
             user = None
 
-        print("token: ", default_token_generator.check_token(user, token))
         if user and default_token_generator.check_token(user, token):
             user.is_active = True
             user.account_verified = True
@@ -182,23 +199,80 @@ class VerifyAccountView(AuthSecurityMixin, UserPassesTestMixin, AuthLogMixin, Vi
         return redirect('home')
 
 
-class UserLoginView(AuthSecurityMixin, UserPassesTestMixin, AuthLogMixin, LoginView):
-    """Vista de Login utilizando CBV y Mixins de auditoría."""
-    form_class = CustomAuthenticationForm
-    template_name = 'auth/auth_login.html'
+class UserPasswordResetView(PasswordResetView):
+    """Vista para solicitar el restablecimiento de contraseña."""
+    template_name = 'auth/pass_reset.html'  # El formulario en la web
+    html_email_template_name = 'auth/pass_reset_email.html'
+    email_template_name = 'auth/pass_reset_email_plain.txt'
+    subject_template_name = 'auth/pass_reset_subject.txt'
+    success_url = reverse_lazy('password_reset_done')
+    form_class = CustomPasswordResetForm
+
+
+class UserPasswordResetDoneView(PasswordResetDoneView):
+    """Vista que confirma que el email ha sido enviado."""
+    template_name = 'auth/pass_reset_done.html'
+
+
+# views.py - Proyecto EcoCircular
+
+# views.py - Proyecto EcoCircular
+
+# views.py - Proyecto EcoCircular
+
+class UserPasswordResetConfirmView(AuthLogMixin, PasswordResetConfirmView):
+    """
+    Vista donde el usuario introduce su nueva contraseña.
+    Proporciona feedback detallado de errores y registro de auditoría.
+    """
+    template_name = 'auth/pass_reset_confirm.html'
+    form_class = CustomSetPasswordForm
+    success_url = reverse_lazy('password_reset_complete')
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        self.auth_log(self.request.user, 'login', 'Inicio de sesión exitoso.')
-        messages.success(self.request, f"Bienvenido {self.request.user.username}.")
+
+        uidb64 = self.kwargs.get('uidb64')
+        user = self.get_user(uidb64)  # Ahora con el argumento requerido
+        user.refresh_from_db()
+
         return response
 
     def form_invalid(self, form):
-        username_attempted = form.data.get('username', 'Anónimo')
-        self.auth_log(None, 'login', 'Credenciales inválidas.', manual_username=username_attempted)
-        messages.error(self.request, "Credenciales inválidas.", extra_tags='danger')
+        storage = messages.get_messages(self.request)
+        storage.used = True
+
+        for field, errors in form.errors.items():
+            for error in errors:
+                err_str = str(error)
+                messages.error(self.request, f"{err_str}", extra_tags='danger')
+
         return super().form_invalid(form)
 
+
+class UserPasswordResetCompleteView(PasswordResetCompleteView):
+    """Vista que confirma que la contraseña se cambió con éxito."""
+    template_name = 'auth/pass_reset_complete.html'
+
+
+class ProfileView(View):
+    template_name = 'accounts/profile.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        return render(request, self.template_name)
+
+
+class TestView(View):
+    template_name = 'test.html'
+
+    def get(self, request):
+        return render(request, self.template_name)
+
+    def post(self, request):
+        return render(request, self.template_name)
 
 class HomeView(View):
     template_name = 'home.html'

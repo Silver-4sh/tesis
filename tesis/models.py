@@ -56,43 +56,26 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     ]
 
     # 5. Validador de teléfono ultra-preciso para Cuba
-    # ^(\+53)? : Prefijo internacional opcional.
-    # (5[0-8]\d{6} : Móviles (5 + dígito 0-8 + 6 dígitos).
-    # |  7(
-    #     20[1-9]|26\d|27\d|  # Playa, Marianao, La Lisa
-    #     83\d|86\d|87\d|      # Plaza, Centro Habana, Habana Vieja
-    #     76\d|79\d|           # Diez de Octubre, Arroyo Naranjo
-    #     64\d|62\d            # Guanabacoa, Cotorro, Regla
-    #   )\d{4}                 # Completa los 7 dígitos del número fijo local
     phone_validator = RegexValidator(
-        regex=r'^(\+53)?(5[0-8]\d{6}|7(20|26|27|83|86|87|76|79|64|62)\d{5})$',
-        message="El número debe ser un móvil (+53 5...) o un fijo válido de La Habana (+53 7...)."
+        regex=r'^(5\d{7})$',
+        message="El número debe ser un móvil (5...)."
     )
 
     # Campos base de Django y personalizados
     id = models.AutoField(primary_key=True)
-    username = models.CharField(max_length=50, unique=True)
+    username = models.CharField(max_length=25, unique=True)
     email = models.EmailField(unique=True)
-    name = models.CharField(max_length=150, verbose_name="Nombre Completo")
-    ci = models.CharField(
-        max_length=11,
-        validators=[RegexValidator(r'^\d{11}$', 'El CI debe contener exactamente 11 dígitos.')],
-        verbose_name="Carnet de Identidad"
-    )
+    name = models.CharField(max_length=50, verbose_name="Nombre Completo")
+    ci = models.CharField(max_length=11, null=True, blank=True, validators=[RegexValidator(r'^\d{11}$', 'El CI debe contener exactamente 11 dígitos.')], unique=True,
+                          verbose_name="Carnet de Identidad")
     location = models.CharField(max_length=50, choices=MUNICIPIOS_HAVANA, default='---')
-    phone_number = models.CharField(
-        max_length=12,
-        blank=True,
-        null=True,
-        validators=[phone_validator],
-        verbose_name="Teléfono (Cuba)"
-    )
+    phone_number = models.CharField(max_length=12, blank=True, null=True, validators=[phone_validator], unique=True, verbose_name="Teléfono")
 
     # Clasificación de cuenta
     is_active = models.BooleanField(default=False)
     account_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='blocked')
     account_verified = models.BooleanField(default=False)
-    roles = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
     entity_type = models.CharField(max_length=15, choices=ENTITY_CHOICES, default='---', verbose_name="Tipo de Entidad")
 
     # Campos de control de Django
