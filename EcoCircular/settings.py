@@ -151,6 +151,8 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 
 AUTH_USER_MODEL = 'tesis.CustomUser'
 
+LOGIN_REDIRECT_URL = "home"
+
 PASSWORD_RESET_TIMEOUT = 259200
 
 # Reconocer el protocolo HTTPS a través del proxy.

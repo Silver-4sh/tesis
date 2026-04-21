@@ -1,0 +1,24 @@
+{% autoescape off %}
+    <h2>Hola, {{ user.get_full_name|default:user.username }}</h2>
+
+    <p>Has solicitado restablecer la contraseña de tu cuenta en <strong>{{ site_name }}</strong>.</p>
+
+    <p>Para continuar, haz clic en el siguiente botón:</p>
+
+    <div style="margin: 20px 0;">
+        <a
+                class="btn-primary" href=
+                "{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}"
+        >Restablecer mi contraseña</a>
+    </div>
+
+    <p>Si el botón no funciona, copia y pega este enlace:</p>
+    <p>
+        {{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+    </p>
+
+    <hr>
+    <p>Si no solicitaste este cambio, puedes ignorar este correo de forma segura.</p>
+
+    <p>Saludos,<br>El equipo de {{ site_name|default:"CITMA" }}</p>
+{% endautoescape %}

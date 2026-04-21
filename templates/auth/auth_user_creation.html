@@ -3,59 +3,70 @@
 {% load honeypot %}
 
 {% block body %}
-    <div class="container">
-        <div class="row justify-content-center">
+    <div class="bg-spots">
+        <div class="spot spot-green"></div>
+        <div class="spot spot-blue"></div>
+        <div class="spot spot-red"></div>
+    </div>
+
+    <div class="container vh-100 d-flex flex-column justify-content-center" style="position: relative; z-index: 1;">
+
+        <div class="row justify-content-center mb-3">
             <div class="col-md-6">
+                <a href="{% url 'home' %}" class="text-decoration-none text-light small opacity-75">
+                    <i class="bi bi-arrow-left"></i> Volver al inicio
+                </a>
+            </div>
+        </div>
 
-                <!-- Volver -->
-                <div class="my-3">
-                    <a href="{% url 'home' %}" class="text-decoration-none text-muted">
-                        <i class="bi bi-arrow-left"></i> Volver al inicio
-                    </a>
-                </div>
-
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white text-center">
-                        <h3>Crear Cuenta</h3>
+        <div class="row justify-content-center align-items-stretch">
+            <div class="col-3">
+                <div class="card glass-card border-0 h-100">
+                    <div class="card-header bg-transparent text-center py-3 border-bottom border-light border-opacity-10">
+                        <h4 class="mb-0">Crear Cuenta</h4>
                     </div>
 
-                    <div class="card-body px-5">
+                    <div class="card-body px-4 py-4 d-flex flex-column justify-content-center">
                         <form method="post" class="needs-validation" novalidate>
                             {% csrf_token %}
 
                             {% render_honeypot_field "full_name_field" %}
 
                             {% for field in form %}
-                                {% if field.name == 'captcha' %}
-                                    {{ field }}
-                                {% else %}
-                                    <div class="mb-3 position-relative">
-                                        <label class="form-label font-weight-bold">{{ field.label }}</label>
-
-                                        {% if "password" in field.name %}
-                                            <div class="input-group has-validation">
-                                                {{ field }}
-                                                <button class="btn btn-outline-secondary toggle-password" type="button">
-                                                    <i class="bi bi-eye"></i>
-                                                </button>
-                                            </div>
-                                        {% else %}
+                                <div class="mb-3 position-relative">
+                                    {% if "password" in field.name %}
+                                        <div class="input-group has-validation">
                                             {{ field }}
-                                        {% endif %}
-                                    </div>
-                                {% endif %}
+                                            <button class="btn btn-outline-light border-secondary toggle-password" type="button">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        {{ field }}
+                                    {% endif %}
+                                </div>
                             {% endfor %}
 
                             <div class="text-center mt-4">
-                                <button type="button" id="btn-submit-manual" class="btn btn-primary px-5">
-                                    Registrar Cuenta
+                                <button type="button" id="btn-submit-manual" class="btn btn-green px-5">
+                                    Crear Cuenta
                                 </button>
                             </div>
                         </form>
                     </div>
 
-                    <div class="card-footer text-center">
-                        <small>¿Ya tienes cuenta? <a href="{% url 'login' %}">Accede aquí</a></small>
+                    <div class="card-footer text-center bg-transparent border-0 pb-4">
+                        <p class="text-muted">¿Ya tienes cuenta? <a href="{% url 'login' %}" class="text-green text-decoration-none fw-bold">Accede aquí</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3 d-none d-md-flex">
+                <div class="card glass-card border-0 shadow-sm w-100 overflow-hidden">
+                    <div class="card-body p-0">
+                        <img src="{% static 'img/citma2-nb.png' %}"
+                             alt="Logo Economía Circular"
+                             class="img-fluid w-100 h-100"
+                             style="opacity: 0.8;">
                     </div>
                 </div>
             </div>

@@ -1,0 +1,40 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block body %}
+    TEST
+
+{% endblock body %}
+
+
+{# Modal para cambios administrativos (Estado y Staff) #}
+{% if request.user.role == 'admin' %}
+    <div class="modal fade" id="adminSettingsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="modal-header bg-dark text-white">
+                        <h5 class="modal-title">Configuración Administrativa</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted">Editando permisos para <strong>@{{ user.username }}</strong></p>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Estado de la Cuenta</label>
+                            {# Se asume que estos campos se manejan en una vista administrativa separada #}
+                            <select name="account_status" class="form-select">
+                                {% for code, name in user.STATUS_CHOICES %}
+                                    <option value="{{ code }}" {% if user.account_status == code %}selected{% endif %}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger w-100">Aplicar Cambios Administrativos</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
