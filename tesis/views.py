@@ -161,7 +161,6 @@ class UserLoginView(AuthSecurityMixin, UserPassesTestMixin, AuthLogMixin, LoginV
         return response
 
     def form_invalid(self, form):
-        print(f"DEBUG LOGIN FALLIDO: {form.errors.as_json()}")
         username_attempted = form.data.get('username', 'Anónimo')
         self.auth_log(None, 'login', 'Credenciales inválidas.', manual_username=username_attempted)
         messages.error(self.request, "Credenciales inválidas.", extra_tags='danger')

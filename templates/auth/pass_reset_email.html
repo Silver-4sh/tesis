@@ -6,8 +6,7 @@
     <p>Para continuar, haz clic en el siguiente botón:</p>
 
     <div style="margin: 20px 0;">
-        <a
-                class="btn-primary" href=
+        <a class="btn-primary" href=
                 "{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}"
         >Restablecer mi contraseña</a>
     </div>

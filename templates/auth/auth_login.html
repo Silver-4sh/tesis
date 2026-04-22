@@ -20,7 +20,6 @@
         </div>
 
         <div class="row justify-content-center align-items-stretch">
-
             <div class="col-3 d-none d-md-flex">
                 <div class="card glass-card border-0 shadow-sm w-100 overflow-hidden">
                     <div class="card-body p-0">
@@ -31,16 +30,17 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-3">
                 <div class="card glass-card border-0 h-100">
                     <div class="card-header bg-transparent text-center py-3 border-bottom border-light border-opacity-10">
                         <h4 class="mb-0">Iniciar Sesión</h4>
                     </div>
-                    <div class="card-body px-4 py-4 d-flex flex-column justify-content-center">
-                        {{ form.media }}
 
+                    <div class="card-body px-4 py-4 d-flex flex-column justify-content-center">
                         <form method="post" class="needs-validation" novalidate>
                             {% csrf_token %}
+
                             {% render_honeypot_field "full_name_field" %}
 
                             {% for field in form %}
@@ -48,7 +48,7 @@
                                     {% if "password" in field.name %}
                                         <div class="input-group has-validation">
                                             {{ field }}
-                                            <button class="btn btn-outline-light border-secondary toggle-password" type="button">
+                                            <button class="btn btn-outline-light border-secondary toggle-password" type="button" tabindex="-1">
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                         </div>
@@ -59,7 +59,9 @@
                             {% endfor %}
                             <a href="{% url 'password_reset' %}" class="text-green text-decoration-none fw-bold">¿Olvidate tu contraseña?</a>
                             <div class="text-center mt-4">
-                                <button type="submit" class="btn btn-green w-100 py-2">Acceder</button>
+                                <button type="button" id="btn-submit-manual" class="btn btn-green px-5">
+                                    Acceder
+                                </button>
                             </div>
                         </form>
                     </div>

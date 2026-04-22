@@ -28,10 +28,12 @@ class CustomUserCreationForm(UserCreationForm):
         self.fields['captcha'] = captcha_field
 
 
-# accounts/forms.py
-
 class CustomAuthenticationForm(AuthenticationForm):
-    captcha = ReCaptchaField(widget=ReCaptchaV3())
+    captcha = ReCaptchaField(widget=ReCaptchaV3(attrs={'data-action': 'login'}))
+
+    class Meta(UserCreationForm.Meta):
+        model = CustomUser
+        fields = ('username', 'email')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,21 +42,13 @@ class CustomAuthenticationForm(AuthenticationForm):
         self.fields['password'].label = "Contraseña"
 
         for field_name, field in self.fields.items():
-            css_classes = 'form-control'
-            if field_name in self.errors:
-                css_classes += ' is-invalid'
+            if field_name != 'captcha':
+                field.widget.attrs.update({'class': 'form-control',
+                                           'placeholder': field.label
+                                           })
 
-            field.widget.attrs.update({
-                'class': css_classes,
-                'placeholder': field.label
-            })
-
-    def clean(self):
-        # 2. Forzamos la limpieza del error de captcha si existe
-        cleaned_data = super().clean()
-        if 'captcha' in self._errors:
-            del self._errors['captcha']
-        return cleaned_data
+        captcha_field = self.fields.pop('captcha')
+        self.fields['captcha'] = captcha_field
 
 
 class CustomPasswordResetForm(PasswordResetForm):
