@@ -1,0 +1,51 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block body %}
+    <div class="bg-spots">
+        <div class="spot spot-green"></div>
+        <div class="spot spot-blue"></div>
+        <div class="spot spot-red"></div>
+    </div>
+
+    <div class="container vh-100 d-flex flex-column justify-content-center" style="position: relative; z-index: 1;">
+
+        <div class="row justify-content-center mb-3">
+            <div class="col-md-5">
+                <a href="{% url 'home' %}" class="text-decoration-none text-light small opacity-75">
+                    <i class="bi bi-house-door"></i> Volver al inicio
+                </a>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-11 col-sm-9 col-md-5">
+                <div class="card glass-card border-0 shadow-lg">
+                    <div class="card-header bg-transparent text-center py-4 border-bottom border-light border-opacity-10">
+                        <i class="bi bi-exclamation-circle text-red mb-2" style="font-size: 4rem; display: block;"></i>
+                        <h1 class="display-4 fw-bold mb-0">404</h1>
+                        <h4 class="mb-0">Página no encontrada</h4>
+                    </div>
+
+                    <div class="card-body">
+                        <p class="text-center mb-4 opacity-75">
+                            Lo sentimos, la página que estás buscando no existe o ha sido movida.
+                        </p>
+
+                        <div class="d-flex justify-content-center mb-3">
+                            <a href="{% url 'home' %}" class="btn btn-green fw-bold shadow-sm py-2" style="width: 100%; max-width: 400px;">
+                                Regresar al Panel Principal
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-center bg-transparent border-0 pb-4">
+                        <small class="text-muted">
+                            Si crees que esto es un error, <a href="{% url 'contact-admin' %}" class="text-green text-decoration-none fw-bold">reporta el problema</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body %}

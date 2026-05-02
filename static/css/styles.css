@@ -10,7 +10,7 @@
     transform: scale(1.1);
 }
 
-[data-bs-theme='dark'] .theme-toggle-btn:hover {
+[data-bs-theme = 'dark'] .theme-toggle-btn:hover {
     background-color: #343a40;
     color: #ffca28;
     border-color: #ffca28 !important;
@@ -125,7 +125,7 @@
     height: 50vw;
     border-radius: 50%;
     filter: blur(120px);
-    opacity: 0.6;
+    opacity: 0.7;
     transition: all 0.5s ease;
 }
 
@@ -133,29 +133,29 @@
 .spot-green {
     background-color: #1b4d3e;
     top: -15%;
-    left: -10%;
+    left: 0;
 }
 
 .spot-blue {
     background-color: #0d47a1;
-    bottom: -10%;
-    right: -5%;
+    bottom: 10%;
+    right: 5%;
 }
 
 .spot-red {
     background-color: #b71c1c;
-    top: 30%;
+    top: 40%;
     left: 20%;
 }
 
 /* Ajuste sutil para modo oscuro para no quemar el contraste del texto blanco */
-[data-bs-theme='dark'] .spot {
-    opacity: 0.5;
+[data-bs-theme = 'dark'] .spot {
+    opacity: 0.7;
 }
 
 /* --- GLASSMORPHISM ADAPTATIVO --- */
 .glass-card {
-    background: rgba(var(--bs-body-bg-rgb), 0.3) !important;
+    background: rgba(var(--bs-body-bg-rgb), 0.6) !important;
     backdrop-filter: blur(15px) !important;
     -webkit-backdrop-filter: blur(15px) !important;
     border: 1px solid rgba(var(--bs-emphasis-color-rgb), 0.2) !important;

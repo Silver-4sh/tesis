@@ -1,0 +1,31 @@
+{% autoescape off %}
+    <!DOCTYPE html>
+    <html>
+    <body style="font-family: sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+        <h2 style="color: #2e7d32;">Hola {{ user.username }},</h2>
+
+        <p>Gracias por registrarte en <strong>EcoCircular</strong>. Para activar tu cuenta, por favor haz clic en el botón de abajo:</p>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="{{ protocol }}://{{ domain }}{% url 'verify-account' uidb64 = uid token = token %}"
+               style="background-color: #2e7d32; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                Confirmar Registro
+            </a>
+        </div>
+
+        <p style="font-size: 12px; color: #666;">
+            Si tienes problemas con el botón, copia y pega este enlace en tu navegador:<br>
+            <span style="word-break: break-all; color: #007bff;">
+                {{ protocol }}://{{ domain }}{% url 'verify-account' uidb64 = uid token = token %}
+            </span>
+        </p>
+
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <p style="font-size: 13px;">Este enlace expirará en breve por razones de seguridad.</p>
+        <p style="font-size: 13px;">Saludos,<br>El equipo de <strong>{{ site_name|default:"CITMA" }}</strong></p>
+    </div>
+    </body>
+    </html>
+{% endautoescape %}

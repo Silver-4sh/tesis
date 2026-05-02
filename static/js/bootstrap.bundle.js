@@ -317,7 +317,7 @@
      * Constants
      */
 
-    const namespaceRegex = /[^.]*(?=\..*)\.|.*/;
+    const namespaceRegex = /^[^.]*/;
     const stripNameRegex = /\..*/;
     const stripUidRegex = /::\d+$/;
     const eventRegistry = {}; // Events storage
@@ -800,7 +800,7 @@
             return [];
         },
         focusableChildren(element) {
-            const focusables = ['a', 'button', 'input', 'textarea', 'select', 'details', '[tabindex]', '[contenteditable="true"]'].map(selector => `${selector}:not([tabindex^="-"])`).join(',');
+            const focusables = ['a', 'button', 'input', 'textarea', 'select', 'details', '[tabindex]', '[contenteditable = "true"]'].map(selector => `${selector}:not([tabindex ^= "-"])`).join(',');
             return this.find(focusables, element).filter(el => !isDisabled(el) && isVisible(el));
         },
         getSelectorFromElement(element) {
@@ -830,7 +830,7 @@
     const enableDismissTrigger = (component, method = 'hide') => {
         const clickEvent = `click.dismiss${component.EVENT_KEY}`;
         const name = component.NAME;
-        EventHandler.on(document, clickEvent, `[data-bs-dismiss="${name}"]`, function (event) {
+        EventHandler.on(document, clickEvent, `[data-bs-dismiss = "${name}"]`, function (event) {
             if (['A', 'AREA'].includes(this.tagName)) {
                 event.preventDefault();
             }
@@ -937,7 +937,7 @@
     const EVENT_KEY$a = `.${DATA_KEY$9}`;
     const DATA_API_KEY$6 = '.data-api';
     const CLASS_NAME_ACTIVE$3 = 'active';
-    const SELECTOR_DATA_TOGGLE$5 = '[data-bs-toggle="button"]';
+    const SELECTOR_DATA_TOGGLE$5 = '[data-bs-toggle = "button"]';
     const EVENT_CLICK_DATA_API$6 = `click${EVENT_KEY$a}${DATA_API_KEY$6}`;
 
     /**
@@ -1156,7 +1156,7 @@
     const SELECTOR_ITEM_IMG = '.carousel-item img';
     const SELECTOR_INDICATORS = '.carousel-indicators';
     const SELECTOR_DATA_SLIDE = '[data-bs-slide], [data-bs-slide-to]';
-    const SELECTOR_DATA_RIDE = '[data-bs-ride="carousel"]';
+    const SELECTOR_DATA_RIDE = '[data-bs-ride = "carousel"]';
     const KEY_TO_DIRECTION = {
         [ARROW_LEFT_KEY$1]: DIRECTION_RIGHT,
         [ARROW_RIGHT_KEY$1]: DIRECTION_LEFT
@@ -1364,7 +1364,7 @@
             const activeIndicator = SelectorEngine.findOne(SELECTOR_ACTIVE, this._indicatorsElement);
             activeIndicator.classList.remove(CLASS_NAME_ACTIVE$2);
             activeIndicator.removeAttribute('aria-current');
-            const newActiveIndicator = SelectorEngine.findOne(`[data-bs-slide-to="${index}"]`, this._indicatorsElement);
+            const newActiveIndicator = SelectorEngine.findOne(`[data-bs-slide-to = "${index}"]`, this._indicatorsElement);
             if (newActiveIndicator) {
                 newActiveIndicator.classList.add(CLASS_NAME_ACTIVE$2);
                 newActiveIndicator.setAttribute('aria-current', 'true');
@@ -1533,7 +1533,7 @@
     const WIDTH = 'width';
     const HEIGHT = 'height';
     const SELECTOR_ACTIVES = '.collapse.show, .collapse.collapsing';
-    const SELECTOR_DATA_TOGGLE$4 = '[data-bs-toggle="collapse"]';
+    const SELECTOR_DATA_TOGGLE$4 = '[data-bs-toggle = "collapse"]';
     const Default$a = {
         parent: null,
         toggle: true
@@ -3624,7 +3624,7 @@
     const CLASS_NAME_DROPSTART = 'dropstart';
     const CLASS_NAME_DROPUP_CENTER = 'dropup-center';
     const CLASS_NAME_DROPDOWN_CENTER = 'dropdown-center';
-    const SELECTOR_DATA_TOGGLE$3 = '[data-bs-toggle="dropdown"]:not(.disabled):not(:disabled)';
+    const SELECTOR_DATA_TOGGLE$3 = '[data-bs-toggle = "dropdown"]:not(.disabled):not(:disabled)';
     const SELECTOR_DATA_TOGGLE_SHOWN = `${SELECTOR_DATA_TOGGLE$3}.${CLASS_NAME_SHOW$6}`;
     const SELECTOR_MENU = '.dropdown-menu';
     const SELECTOR_NAVBAR = '.navbar';
@@ -4346,7 +4346,7 @@
     const OPEN_SELECTOR$1 = '.modal.show';
     const SELECTOR_DIALOG = '.modal-dialog';
     const SELECTOR_MODAL_BODY = '.modal-body';
-    const SELECTOR_DATA_TOGGLE$2 = '[data-bs-toggle="modal"]';
+    const SELECTOR_DATA_TOGGLE$2 = '[data-bs-toggle = "modal"]';
     const Default$6 = {
         backdrop: true,
         focus: true,
@@ -4661,7 +4661,7 @@
     const EVENT_RESIZE = `resize${EVENT_KEY$3}`;
     const EVENT_CLICK_DATA_API$1 = `click${EVENT_KEY$3}${DATA_API_KEY$1}`;
     const EVENT_KEYDOWN_DISMISS = `keydown.dismiss${EVENT_KEY$3}`;
-    const SELECTOR_DATA_TOGGLE$1 = '[data-bs-toggle="offcanvas"]';
+    const SELECTOR_DATA_TOGGLE$1 = '[data-bs-toggle = "offcanvas"]';
     const Default$5 = {
         backdrop: true,
         keyboard: true,
@@ -5166,7 +5166,7 @@
         sanitize: true,
         sanitizeFn: null,
         selector: false,
-        template: '<div class="tooltip" role="tooltip">' + '<div class="tooltip-arrow"></div>' + '<div class="tooltip-inner"></div>' + '</div>',
+        template: '<div class = "tooltip" role = "tooltip">' + '<div class = "tooltip-arrow"></div>' + '<div class = "tooltip-inner"></div>' + '</div>',
         title: '',
         trigger: 'hover focus'
     };
@@ -5670,7 +5670,7 @@
         content: '',
         offset: [0, 8],
         placement: 'right',
-        template: '<div class="popover" role="tooltip">' + '<div class="popover-arrow"></div>' + '<h3 class="popover-header"></h3>' + '<div class="popover-body"></div>' + '</div>',
+        template: '<div class = "popover" role = "tooltip">' + '<div class = "popover-arrow"></div>' + '<h3 class = "popover-header"></h3>' + '<div class = "popover-body"></div>' + '</div>',
         trigger: 'click'
     };
     const DefaultType$2 = {
@@ -5755,7 +5755,7 @@
     const EVENT_LOAD_DATA_API$1 = `load${EVENT_KEY$2}${DATA_API_KEY}`;
     const CLASS_NAME_DROPDOWN_ITEM = 'dropdown-item';
     const CLASS_NAME_ACTIVE$1 = 'active';
-    const SELECTOR_DATA_SPY = '[data-bs-spy="scroll"]';
+    const SELECTOR_DATA_SPY = '[data-bs-spy = "scroll"]';
     const SELECTOR_TARGET_LINKS = '[href]';
     const SELECTOR_NAV_LIST_GROUP = '.nav, .list-group';
     const SELECTOR_NAV_LINKS = '.nav-link';

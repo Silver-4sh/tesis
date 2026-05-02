@@ -19,14 +19,14 @@ function showToast(message, type = 'danger') {
     if (msgLower.includes('captcha') || msgLower.includes('seguridad')) icon = 'bi-shield-lock-fill';
 
     const toastHtml = `
-        <div class="toast align-items-center text-white bg-${typeLower} border-0 shadow-lg mb-2" 
-             role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 250px; max-width: 350px;">
-            <div class="d-flex">
-                <div class="toast-body d-flex align-items-start">
-                    <i class="bi ${icon} me-2 mt-1 fs-5"></i>
-                    <div style="word-break: break-word;">${message}</div>
+        <div class = "toast align-items-center text-white bg-${typeLower} border-0 shadow-lg mb-2" 
+             role = "alert" aria-live = "assertive" aria-atomic = "true" style = "min-width: 250px; max-width: 350px;">
+            <div class = "d-flex">
+                <div class = "toast-body d-flex align-items-start">
+                    <i class = "bi ${icon} me-2 mt-1 fs-5"></i>
+                    <div style = "word-break: break-word;">${message}</div>
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                <button type = "button" class = "btn-close btn-close-white me-2 m-auto" data-bs-dismiss = "toast" aria-label = "Cerrar"></button>
             </div>
         </div>`;
 

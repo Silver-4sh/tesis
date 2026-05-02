@@ -1,0 +1,63 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block body %}
+    <div class="bg-spots">
+        <div class="spot spot-green"></div>
+        <div class="spot spot-blue"></div>
+        <div class="spot spot-red"></div>
+    </div>
+
+    <div class="container vh-100 d-flex flex-column justify-content-center align-items-center" style="position: relative; z-index: 1;">
+
+        <div style="width: 100%; max-width: 500px;">
+
+            <div class="row mb-3">
+                <div class="col-12">
+                    <a href="{% url 'home' %}" class="text-decoration-none text-light small opacity-75">
+                        <i class="bi bi-arrow-left"></i> Volver al inicio
+                    </a>
+                </div>
+            </div>
+
+            <div class="card glass-card border-0 shadow-lg" style="border-radius: 15px;">
+                <div class="card-header bg-transparent text-center py-4 border-bottom border-light border-opacity-10">
+                    <i class="bi bi-headset text-green mb-2" style="font-size: 2.5rem; display: block; filter: drop-shadow(0 0 8px rgba(46, 125, 50, 0.2));"></i>
+                    <h4 class="mb-0 fw-bold">Contactar Soporte</h4>
+                    <p class="small mb-0">Estamos aquí para ayudarte</p>
+                </div>
+
+                <div class="card-body px-4 py-4">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        {% for field in form %}
+                            <div class="mb-3 position-relative">
+                                {% if user.is_authenticated and field.name in "username email" %}
+                                    <div class="form-control glass-input opacity-50 bg-transparent text-white border-secondary">
+                                        {{ field.value|default:'' }}
+                                    </div>
+                                    <input type="hidden" name="{{ field.name }}" value="{{ field.value|default:'' }}">
+                                {% else %}
+                                    {{ field }}
+                                {% endif %}
+
+                            </div>
+                        {% endfor %}
+
+                        <div class="text-center mt-4">
+                            <button type="button" id="btn-submit" class="btn btn-green px-5">
+                                Enviar Mensaje
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer text-center bg-transparent border-0 pb-4">
+                    <small class="" style="font-size: 0.8rem;">EcoCircular - Soporte Técnico</small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock body %}

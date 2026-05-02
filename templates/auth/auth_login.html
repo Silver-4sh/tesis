@@ -57,16 +57,16 @@
                                     {% endif %}
                                 </div>
                             {% endfor %}
-                            <a href="{% url 'password_reset' %}" class="text-green text-decoration-none fw-bold">¿Olvidate tu contraseña?</a>
+                            <a href="{% url 'pass-reset' %}" class="text-green text-decoration-none fw-bold">¿Olvidaste tu contraseña?</a>
                             <div class="text-center mt-4">
-                                <button type="button" id="btn-submit-manual" class="btn btn-green px-5">
+                                <button type="button" id="btn-submit" class="btn btn-green px-5">
                                     Acceder
                                 </button>
                             </div>
                         </form>
                     </div>
                     <div class="card-footer text-center bg-transparent border-0 pb-4">
-                        <p class="text-muted">¿No tienes cuenta? <a href="{% url 'user-creation' %}" class="text-green text-decoration-none fw-bold">Créala aquí</a></p>
+                        <p class="">¿No tienes cuenta? <a href="{% url 'auth-user-creation' %}" class="text-green text-decoration-none">Créala aquí</a></p>
                     </div>
                 </div>
             </div>

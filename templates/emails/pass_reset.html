@@ -12,7 +12,7 @@
 
         <div class="row justify-content-center mb-3">
             <div class="col-md-5">
-                <a href="{% url 'login' %}" class="text-decoration-none text-light small opacity-75">
+                <a href="{% url 'auth-login' %}" class="text-decoration-none text-light small opacity-75">
                     <i class="bi bi-arrow-left"></i> Volver al inicio de sesión
                 </a>
             </div>
@@ -45,7 +45,7 @@
                             {% endfor %}
 
                             <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-green fw-bold shadow-sm py-2" style="width: 100%; max-width: 400px;">
+                                <button type="button" id="btn-submit" class="btn btn-green px-5">
                                     Enviar enlace de recuperación
                                 </button>
                             </div>
@@ -53,7 +53,7 @@
 
                         <div class="card-footer text-center bg-transparent border-0 pb-4">
                             <small class="text-muted">
-                                ¿Aún tienes problemas? <a href="#" class="text-green text-decoration-none fw-bold">Contacta a soporte</a>
+                                ¿Aún tienes problemas? <a href="{% url 'contact-admin' %}" class="text-green text-decoration-none fw-bold">Contacta a soporte</a>
                             </small>
                         </div>
                     </div>
