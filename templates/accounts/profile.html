@@ -2,94 +2,145 @@
 {% load static %}
 
 {% block body %}
-    <div class="container col-6 mt-5">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
 
-        {# Tarjeta Principal #}
-        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
-            <div class="card-header py-3">
-                <div class="mb-4 text-center">
-                    {% if mode == 'edit' %}
-                        <h3 class="fw-bold">Mi Perfil Personal</h3>
-                    {% elif mode == 'view' %}
-                        <h3 class="fw-bold">Perfil de {{ user.username }}</h3>
-                    {% else %}
-                        <h3 class="fw-bold">Panel de Control Administrativo</h3>
-                    {% endif %}
-                </div>
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
 
-                <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">@{{ user.username }}</h4>
-                    <div class="d-flex gap-2">
-                        <span class="badge
-                            {% if user.role == 'user' %}bg-info text-dark
-                            {% else %}bg-danger{% endif %} px-3 py-2">
-                            {{ user.get_role_display }}
-                        </span>
-                        {% if user.role == 'admin' %}
-                            <span class="badge bg-success px-3 py-2">{{ user.get_account_status_display }}
-                        </span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
+                    <div class="card-header border-0 pt-4 px-4">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="fw-bold mb-0 text-uppercase tracking-wider" style="font-size: 0.8rem; letter-spacing: 1px;">
+                                    {% if perms.tesis.change_other_data and request.user != profile_user %}
+                                        Panel Administrativo
+                                    {% else %}
+                                        Vista de Perfil
+                                    {% endif %}
+                                </p>
+                                <h2 class="fw-bold mb-1">
+                                    {% if request.user == profile_user %} Mi Perfil
+                                    {% else %} Perfil de {{ profile_user.username }}
+                                    {% endif %}
+                                </h2>
+                                <p class="text-muted"><i class="bi bi-at"></i>{{ profile_user.username }}</p>
+                            </div>
+                            <div class="text-end">
+                                {% if perms.tesis.change_admin_data %}
+                                    <div class="d-flex flex-column gap-2 align-items-end">
+                                        <!-- Role Badge -->
+                                        <span class="badge rounded-pill
+                                            {% if profile_user.role == 'user' %} bg-success-subtle text-success
+                                            {% else %}bg-danger-subtle text-danger{% endif %} border px-3 py-2">
+                                            <i class="bi bi-shield-check me-1"></i> {{ profile_user.role|title }}
+                                        </span>
 
-            <div class="card-body p-4">
-                <div class="row g-4">
-                    <div class="col-md-6">
-                        <div class="p-3 rounded-3">
-                            <small class="text-muted fw-bold d-block mb-1">NOMBRE COMPLETO</small>
-                            <span class="fs-5">{{ user.name|default:"—" }}</span>
+                                        <!-- Status Badge -->
+                                        {% if profile_user.is_deleted %}
+                                            <span class="badge rounded-pill border px-3 py-2bg-danger-subtle text-danger border-danger">
+                                                    <i class="bi bi-info-circle me-1"></i> {{ profile_user.is_deleted }}
+                                                </span>
+                                        {% elif profile_user.is_active %} bg-success-subtle text-success border-success
+                                            <span class="badge rounded-pill border px-3 py-2bg-danger-subtle text-danger border-danger">
+                                                    <i class="bi bi-info-circle me-1"></i> {{ profile_user.get_account_status_display }}
+                                                </span>
+                                        {% else %} bg-warning-subtle text-warning border-warning
+                                        {% endif %}">
+                                        <i class="bi bi-info-circle me-1"></i> {{ profile_user.get_account_status_display }}
+
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="p-3 rounded-3">
-                            <small class="text-muted fw-bold d-block mb-1">CARNET DE IDENTIDAD (CI)</small>
-                            <span class="fs-5">{{ user.ci|default:"—" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 rounded-3">
-                            <small class="text-muted fw-bold d-block mb-1">MUNICIPIO</small>
-                            <span class="fs-5">{{ user.get_location_display }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 rounded-3">
-                            <small class="text-muted fw-bold d-block mb-1">TELÉFONO</small>
-                            <span class="fs-5">{{ user.phone_number|default:"—" }}</span>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="p-3 rounded-3">
-                            <small class="text-muted fw-bold d-block mb-1">TIPO DE ENTIDAD</small>
-                            <span class="fs-5">{{ user.get_entity_type_display }}</span>
-                        </div>
-                    </div>
-                </div>
 
-                {# Botones de Acción #}
-                <div class="d-flex flex-wrap gap-2 mt-5 pt-4 border-top">
-                    <a href="{% url 'home' %}" class="btn btn-outline-secondary px-4">
-                        <i class="bi bi-chevron-left"></i> Atrás
-                    </a>
+                    <div class="card-body p-4 pt-2">
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-4 border-start border-4 border-primary">
+                                    <label class="text-muted small fw-bold d-block text-uppercase mb-1">Nombre Completo</label>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person me-2 text-primary"></i>
+                                        <span class="fw-semibold text-dark">{{ profile_user.name|default:"—" }}</span>
+                                    </div>
+                                </div>
+                            </div>
 
-                    {% if mode == 'edit' %}
-                        <button class="btn btn-primary px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                            <i class="bi bi-pencil-square"></i> Editar Perfil
-                        </button>
-                        <button class="btn btn-outline-warning px-4" data-bs-toggle="modal" data-bs-target="#editPasswordModal">
-                            <i class="bi bi-shield-lock"></i> Contraseña
-                        </button>
-                        <button class="btn btn-outline-danger px-4" data-bs-toggle="modal" data-bs-target="#editDeleteModal">
-                            <i class="bi bi-person-x"></i> Eliminar
-                        </button>
-                    {% endif %}
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-4 border-start border-4 border-secondary">
+                                    <label class="text-muted small fw-bold d-block text-uppercase mb-1">Carnet de Identidad</label>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-card-text me-2 text-secondary"></i>
+                                        <span class="fw-semibold text-dark">{{ profile_user.ci|default:"—" }}</span>
+                                    </div>
+                                </div>
+                            </div>
 
-                    {% if user.role == 'admin' %}
-                        <button class="btn btn-dark ms-auto" data-bs-toggle="modal" data-bs-target="#adminSettingsModal">
-                            <i class="bi bi-gear-fill"></i> Ajustes Admin
-                        </button>
-                    {% endif %}
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-4 border-start border-4 border-info">
+                                    <label class="text-muted small fw-bold d-block text-uppercase mb-1">Municipio</label>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-geo-alt me-2 text-info"></i>
+                                        <span class="fw-semibold text-dark">{{ profile_user.get_location_display }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="p-3 bg-light rounded-4 border-start border-4 border-success">
+                                    <label class="text-muted small fw-bold d-block text-uppercase mb-1">Teléfono</label>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-telephone me-2 text-success"></i>
+                                        <span class="fw-semibold text-dark">{{ profile_user.phone_number|default:"—" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="p-3 bg-light rounded-4 border-start border-4 border-dark">
+                                    <label class="text-muted small fw-bold d-block text-uppercase mb-1">Tipo de Entidad</label>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-building me-2 text-dark"></i>
+                                        <span class="fw-semibold text-dark">{{ profile_user.get_entity_type_display }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 pt-4 border-top d-flex flex-wrap align-items-center justify-content-between gap-3">
+                            <a href="{% url 'home' %}" class="btn btn-link text-decoration-none text-muted p-0">
+                                <i class="bi bi-arrow-left"></i> Volver al Inicio
+                            </a>
+
+                            <div class="d-flex gap-2">
+                                {% if request.user == profile_user %}
+                                    <button class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                        <i class="bi bi-pencil-square me-1"></i> Editar
+                                    </button>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary rounded-pill" type="button" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editPasswordModal"><i
+                                                    class="bi bi-key me-2"></i>Seguridad</a></li>
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+                                            <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#editDeleteModal"><i
+                                                    class="bi bi-trash me-2"></i>Eliminar cuenta</a></li>
+                                        </ul>
+                                    </div>
+                                {% endif %}
+
+                                {% if request.user.role == 'admin' %}
+                                    <button class="btn btn-dark rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#adminSettingsModal">
+                                        <i class="bi bi-gear-fill me-1"></i> Gestión
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -99,7 +150,7 @@
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg">
-                <form method="post" action="{% url 'profile' 'edit' user.id %}" id="profileUpdateForm">
+                <form method="post" action="{% url 'profile' %}" id="profileUpdateForm">
                     {% csrf_token %}
                     <div class="modal-header bg-primary text-white border-0">
                         <h5 class="modal-title fw-bold">Actualizar Información</h5>

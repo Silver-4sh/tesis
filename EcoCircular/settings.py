@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-debug-key-123')
 
 # DEBUG es True por defecto en local, pero False si RAILWAY_ENVIRONMENT existe
-DEBUG = os.getenv('RAILWAY_ENVIRONMENT') is None
+DEBUG = True
 
 # Permitir todos los hosts en Railway, o definir específicamente
 ALLOWED_HOSTS = ['*'] if not DEBUG else ['localhost', '127.0.0.1']
@@ -161,6 +161,10 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
 IS_PRODUCTION = os.getenv('RAILWAY_ENVIRONMENT') is not None
 
 if IS_PRODUCTION:
@@ -178,6 +182,7 @@ if IS_PRODUCTION:
     CSRF_COOKIE_SECURE = True
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_HOST_USER = 'silver4sh2@gmail.com'
     DEFAULT_FROM_EMAIL = 'testing@ecocircular.local'
 
     SESSION_COOKIE_SECURE = False

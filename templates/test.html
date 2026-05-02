@@ -22,12 +22,6 @@
                         <p class="text-muted">Editando permisos para <strong>@{{ user.username }}</strong></p>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Estado de la Cuenta</label>
-                            {# Se asume que estos campos se manejan en una vista administrativa separada #}
-                            <select name="account_status" class="form-select">
-                                {% for code, name in user.STATUS_CHOICES %}
-                                    <option value="{{ code }}" {% if user.account_status == code %}selected{% endif %}>{{ name }}</option>
-                                {% endfor %}
-                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">

@@ -48,7 +48,7 @@
                             {% endfor %}
 
                             <div class="text-center mt-4">
-                                <button type="button" id="btn-submit-manual" class="btn btn-green px-5">
+                                <button type="button" id="btn-submit" class="btn btn-green px-5">
                                     Crear Cuenta
                                 </button>
                             </div>
@@ -56,7 +56,7 @@
                     </div>
 
                     <div class="card-footer text-center bg-transparent border-0 pb-4">
-                        <p class="text-muted">¿Ya tienes cuenta? <a href="{% url 'login' %}" class="text-green text-decoration-none fw-bold">Accede aquí</a></p>
+                        <p class="text-muted">¿Ya tienes cuenta? <a href="{% url 'auth-login' %}" class="text-green text-decoration-none fw-bold">Accede aquí</a></p>
                     </div>
                 </div>
             </div>
