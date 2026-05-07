@@ -1,0 +1,23 @@
+{% extends 'base/base_email.html' %}
+
+{% block title %}Hola {{ user.username }},{% endblock %}
+
+{% block content %}
+    <p>Gracias por registrarte en <strong>EcoCircular</strong>. Para activar tu cuenta, por favor haz clic en el botón de abajo:</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{{ protocol }}://{{ domain }}{% url 'ver-account' uidb64=uid token=token %}"
+           style="background-color: #2e7d32; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+            Confirmar Registro
+        </a>
+    </div>
+
+    <p style="font-size: 12px; color: #666;">
+        Si tienes problemas con el botón, copia y pega este enlace en tu navegador:<br>
+        <span style="word-break: break-all; color: #007bff;">
+            {{ protocol }}://{{ domain }}{% url 'ver-account' uidb64=uid token=token %}
+        </span>
+    </p>
+
+    <p style="font-size: 13px; margin-top: 20px;">Este enlace expirará en breve por razones de seguridad.</p>
+{% endblock %}

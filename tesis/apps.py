@@ -31,15 +31,13 @@ def setup_groups_and_permissions(sender, **kwargs):
         )
 
     admin_perms = [
-        "change_user_data",
-        "change_admin_data",
-        "change_own_data",
-        "change_other_data",
+        "can_change_user_data",
+        "can_change_admin_data",
+        "can_change_other_data",
     ]
 
     user_perms = [
-        'change_own_data',
-        'change_user_data',
+        'can_change_user_data',
     ]
 
     admin_perms_list = get_perms(admin_perms)

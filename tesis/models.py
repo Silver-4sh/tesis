@@ -11,19 +11,8 @@ class CustomUser(AbstractUser, PermissionsMixin):
         ('organization', 'Organización/Empresa'),
     ]
 
-    MUNICIPIOS_HAVANA = [
-        ('arroyo_naranjo', 'Arroyo Naranjo'), ('boyeros', 'Boyeros'),
-        ('centro_habana', 'Centro Habana'), ('cerro', 'Cerro'),
-        ('cotorro', 'Cotorro'), ('diez_de_octubre', 'Diez de Octubre'),
-        ('guanabacoa', 'Guanabacoa'), ('habana_del_este', 'Habana del Este'),
-        ('habana_vieja', 'Habana Vieja'), ('la_lisa', 'La Lisa'),
-        ('marianao', 'Marianao'), ('playa', 'Playa'),
-        ('plaza_revolucion', 'Plaza de la Revolución'), ('regla', 'Regla'),
-        ('san_miguel_padron', 'San Miguel del Padrón'),
-    ]
-
     phone_validator = RegexValidator(
-        regex=r'^(5\d{7})$',
+        regex=r'^5\d{7}$',
         message="El número debe ser un móvil (5...)."
     )
 
@@ -36,18 +25,23 @@ class CustomUser(AbstractUser, PermissionsMixin):
             return 'admin'
         return 'user'
 
+    email = models.EmailField(unique=True, max_length=255, verbose_name="Correo Electrónico",
+                              error_messages={
+                                  'unique': "Ya existe un usuario con este correo electrónico.",
+                              }
+                              )
     ci = models.CharField(
-        max_length=11, null=True, blank=True,
-        validators=[RegexValidator(r'^\d{11}$', 'El CI debe contener exactamente 11 dígitos.')],
-        unique=True, verbose_name="Carnet de Identidad"
+        max_length=11, unique=True, null=True,
+        validators=[RegexValidator(r'^\d{11}$', 'CI must be 11 digits')],
+        verbose_name="Carnet de Identidad"
     )
     phone_number = models.CharField(
-        max_length=12, blank=True, null=True,
-        validators=[phone_validator], unique=True, verbose_name="Teléfono"
+        max_length=8, null=True, unique=True,
+        validators=[phone_validator], verbose_name="Teléfono"
     )
-    location = models.CharField(max_length=50, choices=MUNICIPIOS_HAVANA, default='---', verbose_name="Ubicación")
-    entity_type = models.CharField(max_length=15, choices=ENTITY_CHOICES, default='---', verbose_name="Tipo de Entidad")
-    is_verified = models.BooleanField(default=False)
+    location = models.CharField(max_length=75, verbose_name="Dirección")
+    entity_type = models.CharField(max_length=15, choices=ENTITY_CHOICES, verbose_name="Tipo de Entidad")
+    is_verified = models.BooleanField(default=False, verbose_name="Verificado")
 
     USERNAME_FIELD = 'username'  # This tells Django which field to use for login
     REQUIRED_FIELDS = ['email']  # Fields prompted when running 'createsuperuser'
@@ -56,10 +50,8 @@ class CustomUser(AbstractUser, PermissionsMixin):
         verbose_name = 'Usuario'
         verbose_name_plural = 'Usuarios'
         permissions = [
-            ("change_user_data", "Puede editar campos de usuario"),
-            ("change_admin_data", "Puede editar campos de administrador"),
-            ("change_own_data", "Puede editar sus datos"),
-            ("change_other_data", "Puede editar datos de otros usuarios"),
+            ("can_change_admin_data", "Puede editar campos de administrador"),
+            ("can_change_other_data", "Puede editar datos de otros usuarios"),
         ]
 
     def save(self, *args, **kwargs):
@@ -71,22 +63,23 @@ class CustomUser(AbstractUser, PermissionsMixin):
 
 
 class Logs(models.Model):
-    # Use Prefixes for better filtering: AUTH (Session), SEC (Security), VAL (Verification/Registration)
     EVENT_CHOICES = [
         # Authentication
+        ('AUTH:REGISTRO', 'Creación de cuenta'),
         ('AUTH:INICIO', 'Inicio de sesión'),
-        ('AUTH:INICIO_ERR', 'Error de inicio de sesión'),
+        ('AUTH:INICIO_ERROR', 'Error de inicio de sesión'),
         ('AUTH:CIERRE', 'Cierre de sesión'),
 
         # Validation / Registration
-        ('VAL:REGISTRO', 'Creación de cuenta'),
-        ('VAL:VERIFICACION_ENVIADA', 'Envío de verificación'),
-        ('VAL:VERIFICACION', 'Verificación exitosa'),
-        ('VAL:VERIFICAION_ERR', 'Error de verificación'),
+
+        ('VER:VERIFICACION_ENVIADA', 'Envío de verificación'),
+        ('VER:VERIFICACION', 'Verificación exitosa'),
+        ('VER:VERIFICACION_REMOVIDA', 'Verificación removida'),
+        ('VER:VERIFICAION_ERR', 'Error de verificación'),
 
         # Security
         ('SEC:CONTRASEÑA_CAMBIO', 'Cambio de contraseña'),
-        ('SEC:CORREO_CAMBIO', 'Cambio de email'),
+        ('SEC:CORREO_CAMBIO', 'Cambio de correo'),
         ('SEC:ACTIVIDAD_INUSUAL', 'Actividad inusual'),
     ]
 

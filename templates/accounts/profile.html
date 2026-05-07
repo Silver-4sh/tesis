@@ -2,6 +2,16 @@
 {% load static %}
 
 {% block body %}
+    <style>
+        .is-invalid ~ .invalid-feedback {
+            display: block !important;
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545 !important;
+            padding-right: calc(1.5em + 0.75rem) !important;
+        }
+    </style>
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-lg-8 col-xl-7">
@@ -12,42 +22,49 @@
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <p class="fw-bold mb-0 text-uppercase tracking-wider" style="font-size: 0.8rem; letter-spacing: 1px;">
-                                    {% if perms.tesis.change_other_data and request.user != profile_user %}
+                                    {% if perms.tesis.can_change_other_data and request.user != target_user %}
                                         Panel Administrativo
                                     {% else %}
                                         Vista de Perfil
                                     {% endif %}
                                 </p>
                                 <h2 class="fw-bold mb-1">
-                                    {% if request.user == profile_user %} Mi Perfil
-                                    {% else %} Perfil de {{ profile_user.username }}
+                                    {% if request.user == target_user %} Mi Perfil
+                                    {% else %} Perfil de {{ target_user.username }}
                                     {% endif %}
                                 </h2>
-                                <p class="text-muted"><i class="bi bi-at"></i>{{ profile_user.username }}</p>
+                                <p class="text-muted"><i class="bi bi-at"></i>{{ target_user.username }}</p>
                             </div>
                             <div class="text-end">
-                                {% if perms.tesis.change_admin_data %}
+                                {% if perms.tesis.can_change_admin_data %}
                                     <div class="d-flex flex-column gap-2 align-items-end">
                                         <!-- Role Badge -->
                                         <span class="badge rounded-pill
-                                            {% if profile_user.role == 'user' %} bg-success-subtle text-success
+                                            {% if target_user.role == 'user' %} bg-success-subtle text-success
                                             {% else %}bg-danger-subtle text-danger{% endif %} border px-3 py-2">
-                                            <i class="bi bi-shield-check me-1"></i> {{ profile_user.role|title }}
+                                            <i class="bi bi-shield-exclamation me-1"></i> {{ target_user.role|title }}
                                         </span>
 
                                         <!-- Status Badge -->
-                                        {% if profile_user.is_deleted %}
-                                            <span class="badge rounded-pill border px-3 py-2bg-danger-subtle text-danger border-danger">
-                                                    <i class="bi bi-info-circle me-1"></i> {{ profile_user.is_deleted }}
-                                                </span>
-                                        {% elif profile_user.is_active %} bg-success-subtle text-success border-success
-                                            <span class="badge rounded-pill border px-3 py-2bg-danger-subtle text-danger border-danger">
-                                                    <i class="bi bi-info-circle me-1"></i> {{ profile_user.get_account_status_display }}
-                                                </span>
-                                        {% else %} bg-warning-subtle text-warning border-warning
-                                        {% endif %}">
-                                        <i class="bi bi-info-circle me-1"></i> {{ profile_user.get_account_status_display }}
+                                        <span class="badge rounded-pill border px-3 py-2
+                                            {% if target_user.is_active %}
+                                                bg-success-subtle text-success border-success">
+                                            <i class="bi bi-check-circle me-1"></i> Cuenta Activa
+                                        {% else %}
+                                            bg-danger-subtle text-danger border-danger">
+                                            <i class="bi bi-shield-exclamation me-1"></i> Cuenta Eliminada
+                                        {% endif %}
+                                        </span>
 
+                                        <span class="badge rounded-pill border px-3 py-2
+                                            {% if target_user.is_verified %}
+                                                bg-success-subtle text-success border-success">
+                                            <i class="bi bi-check-circle me-1"></i> Cuenta Verificada
+                                        {% else %}
+                                            bg-danger-subtle text-danger border-danger">
+                                            <i class="bi bi-shield-exclamation me-1"></i> Cuenta No Verificada
+                                        {% endif %}
+                                        </span>
                                     </div>
                                 {% endif %}
                             </div>
@@ -56,89 +73,149 @@
 
                     <div class="card-body p-4 pt-2">
                         <div class="row g-4 mt-2">
+                            <!-- Nombre -->
                             <div class="col-md-6">
-                                <div class="p-3 bg-light rounded-4 border-start border-4 border-primary">
-                                    <label class="text-muted small fw-bold d-block text-uppercase mb-1">Nombre Completo</label>
+                                <div class="p-3 rounded-4 border-start border-4 border-primary">
+                                    <label class="text-muted small fw-bold d-block text-uppercase mb-1">Nombre</label>
                                     <div class="d-flex align-items-center">
                                         <i class="bi bi-person me-2 text-primary"></i>
-                                        <span class="fw-semibold text-dark">{{ profile_user.name|default:"—" }}</span>
+                                        <span class="fw-semibold">{{ target_user.get_full_name|default:target_user.username }}</span>
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- Correo -->
                             <div class="col-md-6">
-                                <div class="p-3 bg-light rounded-4 border-start border-4 border-secondary">
+                                <div class="p-3 rounded-4 border-start border-4 border-primary">
+                                    <label class="text-muted small fw-bold d-block text-uppercase mb-1">Correo</label>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-envelope me-2 text-primary"></i>
+                                        {% if target_user.email %}
+                                            {# Only create the link if the logged-in user is NOT the profile owner #}
+                                            {% if request.user != target_user %}
+                                                <a href="mailto:{{ target_user.email }}" class="fw-semibold text-decoration-none color-inherit">
+                                                    {{ target_user.email }}
+                                                </a>
+                                            {% else %}
+                                                <span class="fw-semibold">{{ target_user.email }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="fw-semibold text-muted">-</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CI -->
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-4 border-start border-4 border-primary">
                                     <label class="text-muted small fw-bold d-block text-uppercase mb-1">Carnet de Identidad</label>
                                     <div class="d-flex align-items-center">
-                                        <i class="bi bi-card-text me-2 text-secondary"></i>
-                                        <span class="fw-semibold text-dark">{{ profile_user.ci|default:"—" }}</span>
+                                        <i class="bi bi-card-text me-2 text-primary"></i>
+                                        <span class="fw-semibold">{{ target_user.ci|default:"-" }}</span>
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- Teléfono -->
                             <div class="col-md-6">
-                                <div class="p-3 bg-light rounded-4 border-start border-4 border-info">
-                                    <label class="text-muted small fw-bold d-block text-uppercase mb-1">Municipio</label>
-                                    <div class="d-flex align-items-center">
-                                        <i class="bi bi-geo-alt me-2 text-info"></i>
-                                        <span class="fw-semibold text-dark">{{ profile_user.get_location_display }}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="p-3 bg-light rounded-4 border-start border-4 border-success">
+                                <div class="p-3 rounded-4 border-start border-4 border-primary">
                                     <label class="text-muted small fw-bold d-block text-uppercase mb-1">Teléfono</label>
                                     <div class="d-flex align-items-center">
-                                        <i class="bi bi-telephone me-2 text-success"></i>
-                                        <span class="fw-semibold text-dark">{{ profile_user.phone_number|default:"—" }}</span>
+                                        <i class="bi bi-telephone me-2 text-primary"></i>
+
+                                        {% if target_user.phone_number %}
+                                            {% if request.user != target_user %}
+                                                <a href="tel:{{ target_user.phone_number }}" class="fw-semibold text-decoration-none hover-primary">
+                                                    {{ target_user.phone_number }}
+                                                </a>
+                                            {% else %}
+                                                <span class="fw-semibold">{{ target_user.phone_number }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="fw-semibold text-muted">—</span>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-12">
-                                <div class="p-3 bg-light rounded-4 border-start border-4 border-dark">
+                            <!-- Dirrección -->
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-4 border-start border-4 border-primary">
+                                    <label class="text-muted small fw-bold d-block text-uppercase mb-1">Dirrección</label>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-geo-alt me-2 text-primary"></i>
+                                        <span class="fw-semibold">{{ target_user.location }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Entidad -->
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-4 border-start border-4 border-primary">
                                     <label class="text-muted small fw-bold d-block text-uppercase mb-1">Tipo de Entidad</label>
                                     <div class="d-flex align-items-center">
-                                        <i class="bi bi-building me-2 text-dark"></i>
-                                        <span class="fw-semibold text-dark">{{ profile_user.get_entity_type_display }}</span>
+                                        <i class="bi bi-building me-2 text-primary"></i>
+                                        <span class="fw-semibold">{{ target_user.get_entity_type_display }}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mt-5 pt-4 border-top d-flex flex-wrap align-items-center justify-content-between gap-3">
-                            <a href="{% url 'home' %}" class="btn btn-link text-decoration-none text-muted p-0">
-                                <i class="bi bi-arrow-left"></i> Volver al Inicio
-                            </a>
-
-                            <div class="d-flex gap-2">
-                                {% if request.user == profile_user %}
-                                    <button class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                                        <i class="bi bi-pencil-square me-1"></i> Editar
-                                    </button>
-                                    <div class="dropdown">
-                                        <button class="btn btn-outline-secondary rounded-pill" type="button" data-bs-toggle="dropdown">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
-                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editPasswordModal"><i
-                                                    class="bi bi-key me-2"></i>Seguridad</a></li>
-                                            <li>
-                                                <hr class="dropdown-divider">
-                                            </li>
-                                            <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#editDeleteModal"><i
-                                                    class="bi bi-trash me-2"></i>Eliminar cuenta</a></li>
-                                        </ul>
+                        {% if perms.tesis.can_change_admin_data %}
+                            <div class="mt-5 pt-3 border-top">
+                                <div class="d-flex justify-content-center gap-4 text-center">
+                                    <!-- Cuenta Creada -->
+                                    <div class="px-3">
+                                        <label class="text-muted d-block mb-0 text-uppercase" style="font-size: 0.75rem; font-weight: 700;">
+                                            Cuenta creada
+                                        </label>
+                                        <span class="text-secondary small">
+                                            <i class="bi bi-calendar3 me-1"></i>
+                                            {{ target_user.date_joined|date:"j \d\e F \d\e Y \a \l\a\s H:i"|default:"-" }}
+                                        </span>
                                     </div>
-                                {% endif %}
 
-                                {% if request.user.role == 'admin' %}
-                                    <button class="btn btn-dark rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#adminSettingsModal">
+                                    <div class="border-start"></div>
+
+                                    <!-- Última Sesión -->
+                                    <div class="px-3">
+                                        <label class="text-muted d-block mb-0 text-uppercase" style="font-size: 0.75rem; font-weight: 700;">
+                                            Última sesión
+                                        </label>
+                                        <span class="text-secondary small">
+                                            <i class="bi bi-clock-history me-1"></i>
+                                            {{ target_user.last_login|date:"j \d\e F \d\e Y \a \l\a\s H:i"|default:"Nunca" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-footer d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <a href="{% url 'home' %}" class="btn btn-link text-decoration-none text-muted p-0">
+                            <i class="bi bi-arrow-left"></i> Volver al Inicio
+                        </a>
+
+                        <div class="d-flex gap-2">
+                            {% if request.user == target_user %}
+                                <button class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#editUserFieldsModal">
+                                    <i class="bi bi-pencil-square me-1"></i> Editar
+                                </button>
+                                <a href="{% url 'pass-reset' %}" class="btn btn-info rounded-pill px-4 shadow-sm text-decoration-none">
+                                    <i class="bi bi-key me-1"></i> Cambiar Contraseña
+                                </a>
+                                <button class="btn btn-danger rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="bi bi-trash3 me-1"></i> Eliminar
+                                </button>
+                            {% else %}
+                                {% if perms.tesis.can_change_admin_data or perms.tesis.can_change_other_data %}
+                                    <button class="btn btn-dark rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#editAdminFieldsModal">
                                         <i class="bi bi-gear-fill me-1"></i> Gestión
                                     </button>
                                 {% endif %}
-                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -146,62 +223,139 @@
         </div>
     </div>
 
-    {# Modal: Editar Perfil #}
-    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    {# Modal: Editar Campos de Usuario #}
+    <div class="modal fade" id="editUserFieldsModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg">
-                <form method="post" action="{% url 'profile' %}" id="profileUpdateForm">
+                <form method="post" action="{% url 'profile' %}" id="profileUpdateForm" novalidate>
                     {% csrf_token %}
                     <div class="modal-header bg-primary text-white border-0">
                         <h5 class="modal-title fw-bold">Actualizar Información</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
-                        {% for field in form %}
-                            <div class="mb-3">
-                                <label class="form-label font-weight-bold">{{ field.label }}</label>
-                                {{ field }} {# Este ya traerá 'form-control is-invalid' desde el servidor #}
 
-                                {% if field.errors %}
-                                    <div class="invalid-feedback d-block">
-                                        {{ field.errors|striptags }}
-                                    </div>
-                                {% endif %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ form.first_name.label }}</label>
+                                <input type="text" name="first_name" class="form-control" required value="{{ form.first_name.value|default:'' }}">
                             </div>
-                        {% endfor %}
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ form.last_name.label }}</label>
+                                <input type="text" name="last_name" class="form-control" required value="{{ form.last_name.value|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ form.email.label }}</label>
+                                <input type="email" name="email" id="id_email" class="form-control"
+                                       value="{{ form.email.value|default:'' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ form.phone_number.label }}</label>
+                                <input type="text" name="phone_number" id="id_phone_number" class="form-control"
+                                       value="{{ form.phone_number.value|default:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ form.ci.label }}</label>
+                                <input type="text" name="ci" id="id_ci" class="form-control"
+                                       pattern="[0-9]{11}" required value="{{ form.ci.value|default:'' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">{{ form.entity_type.label }}</label>
+                                {{ form.entity_type }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">{{ form.location.label }}</label>
+                            <input type="text" name="location" class="form-control" required value="{{ form.location.value|default:'' }}">
+                        </div>
+
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-secondary text-muted" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success px-4">Guardar Cambios</button>
+                        <button type="submit" class="btn btn-success px-4"><i class="bi bi-save me-1"></i> Guardar Cambios</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    {# Lógica de reapertura y colores de borde #}
-    {% if show_modal or request.method == "POST" %}
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                // 1. Reabrir modal si hubo errores
-                {% if show_modal %}
-                    var myModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
-                    myModal.show();
-                {% endif %}
+    {# Modal: Editar Campos de Admin #}
+    <div class="modal fade" id="editAdminFieldsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <form method="post" action="{% url 'profile' %}?id={{ target_user.id }}" id="adminUpdateForm" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="modal-header bg-dark text-white border-0">
+                        <h5 class="modal-title fw-bold">Gestión de Usuario</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <!-- Campo: Rol (Renderizado desde el Formulario) -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold d-block mb-2">{{ form.role.label }}</label>
+                            {{ form.role }}
+                        </div>
 
-                // 2. Aplicar colores a los campos según su estado en el backend
-                {% for field in form %}
-                    var input = document.getElementById('{{ field.id_for_label }}');
-                    if (input) {
-                        {% if field.errors %}
-                            input.classList.add('is-invalid');
-                        {% else %}
-                            input.classList.add('is-valid');
-                        {% endif %}
-                    }
-                {% endfor %}
-            });
-        </script>
-    {% endif %}
+                        <hr class="my-4 opacity-25">
+
+                        <!-- Campo: Cuenta Activa -->
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active"
+                                   {% if form.is_active.value %}checked{% endif %}>
+                            <label class="form-check-label fw-bold" for="id_is_active">
+                                {{ form.is_active.label|default:"Cuenta Activa" }}
+                            </label>
+                        </div>
+
+                        <!-- Campo: Verificada -->
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" name="is_verified" id="id_is_verified"
+                                   {% if form.is_verified.value %}checked{% endif %}>
+                            <label class="form-check-label fw-bold" for="id_is_verified">
+                                {{ form.is_verified.label|default:"Usuario Verificado" }}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary text-muted" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success px-4"><i class="bi bi-save me-1"></i> Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# Modal: Delete Modal #}
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <form method="post" action="{% url 'profile' %}?id={{ target_user.id }}&action=delete" id="deleteUserForm">
+                    {% csrf_token %}
+                    <div class="modal-header bg-danger text-white border-0">
+                        <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Eliminar Usuario</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4 text-center">
+                        <p class="mb-1">¿Estás seguro de que deseas eliminar al usuario <strong>{{ target_user.username }}</strong>?</p>
+                        <small class="text-muted">Esta acción suele implicar la desactivación de la cuenta en el sistema.</small>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light text-muted" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="bi bi-trash me-1"></i> Confirmar Eliminación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
 

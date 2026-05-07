@@ -1,0 +1,77 @@
+{% extends 'base/base.html' %}
+
+{% block title %}
+    <title>Seguridad de la Cuenta - EcoCircular</title>
+{% endblock title %}
+
+{% block body %}
+    <div class="bg-spots">
+        <div class="spot spot-green"></div>
+        <div class="spot spot-blue"></div>
+        <div class="spot spot-red"></div>
+    </div>
+
+    <div class="container vh-100 d-flex flex-column justify-content-center align-items-center" style="position: relative; z-index: 1;">
+
+        <div style="width: 100%; max-width: 500px;">
+
+            <div class="row mb-3">
+                <div class="col-12">
+                    <a href="{% url 'home' %}" class="text-decoration-none text-light small opacity-75">
+                        <i class="bi bi-arrow-left"></i> Ir al inicio
+                    </a>
+                </div>
+            </div>
+
+            <div class="card glass-card border-0 shadow-lg text-center p-5" style="border-radius: 15px;">
+
+                {% if success %}
+                    <div class="mb-4">
+                        <i class="bi bi-shield-lock-fill text-danger" style="font-size: 5rem; filter: drop-shadow(0 0 10px rgba(220, 53, 69, 0.3));"></i>
+                    </div>
+                    <h2 class="fw-bold">Cuenta Desactivada</h2>
+                    <p class="opacity-75 small">
+                        La cuenta ha sido bloqueada correctamente por motivos de seguridad.
+                        Cualquier sesión activa ha sido invalidada.
+                    </p>
+
+                    <hr class="my-4 border-light border-opacity-10">
+
+                    <p class="text-muted small">
+                        Si sospechas que alguien conoce tu contraseña, contacta al administrador.
+                    </p>
+
+                {% else %}
+                    <div class="mb-4">
+                        <i class="bi bi-exclamation-octagon text-warning" style="font-size: 5rem; filter: drop-shadow(0 0 10px rgba(255, 193, 7, 0.2));"></i>
+                    </div>
+                    <h2 class="fw-bold">Enlace no válido</h2>
+                    <p class="opacity-75 small">
+                        Este enlace de seguridad ha expirado o ya fue utilizado.
+                        Si no realizaste el cambio, intenta cambiar tu contraseña desde el login.
+                    </p>
+
+                    <hr class="my-4 border-light border-opacity-10">
+
+                    <div class="mt-2">
+                        <a href="{% url 'auth-login' %}" class="btn btn-green w-100 py-2 fw-bold shadow-sm">
+                            Ir al Login
+                        </a>
+                    </div>
+
+                    <p class="text-muted small mt-4">
+                        ¿Necesitas ayuda inmediata? <a href="{% url 'send-email' %}" class="text-green text-decoration-none fw-bold">Soporte Técnico</a>.
+                    </p>
+                {% endif %}
+
+            </div>
+
+            <div class="text-center mt-4">
+                <small class="opacity-50 text-light small">
+                    Protección de Datos EcoCircular
+                </small>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

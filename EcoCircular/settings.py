@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'tesis.apps.TesisConfig',
     'django_recaptcha',
     'honeypot',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -58,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'tesis.middlewares.DisableClientSideCachingMiddleware',
 ]
 
 ROOT_URLCONF = 'EcoCircular.urls'
@@ -172,7 +174,6 @@ if IS_PRODUCTION:
     EMAIL_HOST = 'smtp.gmail.com'
     EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
     EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
-    EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False') == 'True'
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
     DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
@@ -182,8 +183,20 @@ if IS_PRODUCTION:
     CSRF_COOKIE_SECURE = True
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-    EMAIL_HOST_USER = 'silver4sh2@gmail.com'
-    DEFAULT_FROM_EMAIL = 'testing@ecocircular.local'
+    DEFAULT_FROM_EMAIL = 'EcoCircular@gmail.com'
 
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
+
+Q_CLUSTER = {
+    'name': 'EcoCircularQueue',
+    'workers': 4,
+    'recycle': 500,
+    'timeout': 60,
+    'compress': True,
+    'cpu_affinity': 1,
+    'save_limit': 250,
+    'queue_limit': 500,
+    'label': 'Django Q',
+    'orm': 'default',
+}

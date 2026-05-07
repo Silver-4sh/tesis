@@ -47,14 +47,14 @@
                     <hr class="my-4 border-light border-opacity-10">
 
                     <div class="mt-2">
-                        <a href="{% url 'verify-resend' uidb64_pk = uidb64 %}"
+                        <a href="{% url 'ver-resend' uidb64_pk=uidb64 %}"
                            class="btn btn-green w-100 py-2 fw-bold shadow-sm">
                             Solicitar nuevo enlace
                         </a>
                     </div>
 
                     <p class="text-muted small mt-4">
-                        ¿Tienes problemas? <a href="{% url 'contact-admin' %}" class="text-green text-decoration-none fw-bold">Contacta a Soporte</a>.
+                        ¿Tienes problemas? <a href="{% url 'send-email' %}" class="text-green text-decoration-none fw-bold">Contacta a Soporte</a>.
                     </p>
                 {% endif %}
 

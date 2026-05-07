@@ -6,14 +6,16 @@ from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.contrib.auth.models import Group
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.http import urlsafe_base64_decode
+from django.utils.timezone import now
 from django.views import View
 from django.views.generic import CreateView, FormView, TemplateView
 
-from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomPasswordResetForm, CustomSetPasswordForm, EmailForm, UserUpdateForm
-from .mixins import AuthSecurityMixin, LogMixin, EmailMixin, ProfilePermissionMixin
+from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomPasswordResetForm, CustomSetPasswordForm, EmailForm, UserUpdateForm, AdminUpdateForm
+from .mixins import AuthSecurityMixin, LogMixin, EmailMixin, AccessMixin
 from .models import CustomUser
 
 
@@ -30,17 +32,23 @@ class UserCreationView(AuthSecurityMixin, UserPassesTestMixin, LogMixin, EmailMi
 
         self.log(
             user=user,
-            event_type='VAL:REGISTRO',
+            event_type='AUTH:REGISTRO',
             details={'msj': 'Creación de cuenta exitosa.'})
 
         try:
             user_group, created = Group.objects.get_or_create(name='user')
             user.groups.add(user_group)
 
-            self.verification_email(user)
+            self.system_email(
+                user=user,
+                subject="Activa tu cuenta de EcoCircular",
+                template='emails/verification_email.html',
+                url_name='ver-account'
+            )
+
             self.log(
                 user=user,
-                event_type='VAL:VERIFICACION_ENVIADA',
+                event_type='VER:VERIFICACION_ENVIADA',
                 details={'msj': 'Correo de verificación enviado.'})
 
             messages.success(
@@ -51,7 +59,7 @@ class UserCreationView(AuthSecurityMixin, UserPassesTestMixin, LogMixin, EmailMi
         except Exception as e:
             self.log(
                 user=user,
-                event_type='VAL:VERIFICAION_ERR',
+                event_type='VER:VERIFICAION_ERR',
                 details={'error': 'SMTP_ERROR', 'exception': str(e)})
 
             messages.warning(
@@ -72,13 +80,13 @@ class UserCreationView(AuthSecurityMixin, UserPassesTestMixin, LogMixin, EmailMi
 
                 if "existe" in err_str:
                     display_msg = "Credenciales inválidas."
-                    event = 'VAL:VERIFICAION_ERR'
+                    event = 'VER:VERIFICAION_ERR'
                 elif "CAPTCHA" in err_str:
                     display_msg = "Fallo de seguridad Captcha."
                     event = 'SEC:UNUSUAL_ACT'
                 else:
                     display_msg = err_str
-                    event = 'VAL:VERIFICAION_ERR'
+                    event = 'VER:VERIFICAION_ERR'
 
                 if display_msg not in processed_errors:
                     self.log(
@@ -87,7 +95,8 @@ class UserCreationView(AuthSecurityMixin, UserPassesTestMixin, LogMixin, EmailMi
                         details={'error': error},
                         manual_username=self.request.POST.get('username')
                     )
-                messages.error(self.request, display_msg, extra_tags='danger')
+                    messages.error(self.request, display_msg, extra_tags='danger')
+                    processed_errors.add(display_msg)
 
         return super().form_invalid(form)
 
@@ -95,7 +104,7 @@ class UserCreationView(AuthSecurityMixin, UserPassesTestMixin, LogMixin, EmailMi
 # endregion USER CREATION
 
 # region LOGIN
-class UserLoginView(AuthSecurityMixin, LogMixin, LoginView):
+class UserLoginView(AuthSecurityMixin, AccessMixin, LogMixin, LoginView):
     form_class = CustomAuthenticationForm
     template_name = 'auth/auth_login.html'
 
@@ -117,7 +126,7 @@ class UserLoginView(AuthSecurityMixin, LogMixin, LoginView):
         username_attempted = form.data.get('username', 'Anónimo')
         self.log(
             user=None,
-            event_type='AUTH:INICIO_ERR',
+            event_type='AUTH:INICIO_ERROR',
             details={'msj': 'Credenciales inválidas.'},
             manual_username=username_attempted)
 
@@ -161,19 +170,29 @@ class LogoutView(LoginRequiredMixin, LogMixin, View):
 # region USER VERIFICATION
 
 # region ACCOUNT VERIFICATION
-class VerifyAccountView(AuthSecurityMixin, UserPassesTestMixin, LogMixin, View):
+
+class VerificationView(AuthSecurityMixin, UserPassesTestMixin, LogMixin, View):
+    @staticmethod
+    def get_user(uidb64):
+        """Helper para decodificar y obtener al usuario de forma segura."""
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            return CustomUser.objects.filter(pk=uid).first()
+        except (TypeError, ValueError, OverflowError):
+            return None
+
     def get(self, request, uidb64, token):
-        user = self.help_get_user(uidb64)
+        user = self.get_user(uidb64)
 
         if not user or not default_token_generator.check_token(user, token):
             err = "Usuario no encontrado" if not user else "Token inválido o expirado"
 
             self.log(
                 user=user,
-                event_type='VAL:VERIFICAION_ERR',
+                event_type='VER:VERIFICAION_ERR',
                 details={'error': err, 'token': token if token else None}
             )
-            return render(request, 'emails/verification_complete.html',
+            return render(request, 'verifications/verification_complete.html',
                           context={
                               'validlink': False,
                               'verified_user': None,
@@ -184,39 +203,36 @@ class VerifyAccountView(AuthSecurityMixin, UserPassesTestMixin, LogMixin, View):
         user.save(update_fields=['is_verified'])
         self.log(
             user=user,
-            event_type='VAL:VERIFICACION',
+            event_type='VER:VERIFICACION',
             details={'msj': 'Verificación de cuenta exitosa.'})
 
-        return render(request, 'emails/verification_complete.html', {
+        return render(request, 'verifications/verification_complete.html', {
             'verified_user': user,
             'validlink': True
         })
 
-    @staticmethod
-    def help_get_user(uidb64):
-        """Helper para decodificar y obtener al usuario de forma segura."""
-        try:
-            uid = urlsafe_base64_decode(uidb64).decode()
-            return CustomUser.objects.filter(pk=uid).first()
-        except (TypeError, ValueError, OverflowError):
-            return None
-
-
 # endregion ACCOUNT VERIFICATION
 
-# region VERIFICATION RESEND
-class ResendActivationView(EmailMixin, LogMixin, View):
+# region RESEND VERIFICATION
+
+class VerificationResendView(EmailMixin, LogMixin, View):
     def get(self, request, uidb64_pk):
-        user = VerifyAccountView.help_get_user(uidb64_pk)
+        user = VerificationView.get_user(uidb64_pk)
 
         if not user:
             user = CustomUser.objects.filter(pk=uidb64_pk).first()
 
         if user and not user.account_verified:
-            self.verification_email(user)
+            self.system_email(
+                user=user,
+                subject="Activa tu cuenta de EcoCircular",
+                template='emails/verification_email.html',
+                url_name='ver-resend'
+            )
+
             self.log(
                 user=user,
-                event_type='VAL:VERIFICACION_ENVIADA',
+                event_type='VER:VERIFICACION_ENVIADA',
                 details={'msj': 'Email de verificación enviado.', 'reenviado': True})
 
             messages.success(request,
@@ -225,7 +241,7 @@ class ResendActivationView(EmailMixin, LogMixin, View):
         else:
             self.log(
                 user=user,
-                event_type='VAL:VERIFICAION_ERR',
+                event_type='VER:VERIFICAION_ERR',
                 details={'error': 'SMTP_ERROR'})
 
             messages.error(request=request,
@@ -237,6 +253,35 @@ class ResendActivationView(EmailMixin, LogMixin, View):
 
 # endregion VERIFICATION RESEND
 
+# region REMOVE VERIFICATION
+
+class VerificationRemoveView(LogMixin, View):
+    def get(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = CustomUser.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            user = None
+
+        if user and user.is_active and default_token_generator.check_token(user, token):
+            user.is_verified = False
+            user.last_login = now()
+            user.save()
+
+            if hasattr(self, 'log'):
+                self.log(
+                    user=user,
+                    event_type='VER:VERIFICACION_REMOVIDA',
+                    details={'msj': 'Verificación removida tras cambio de correo no autorizado.'}
+                )
+
+            return render(request, 'verifications/verification_remove.html', {'success': True})
+
+        return render(request, 'verifications/verification_remove.html', {'success': False})
+
+
+# endregion REMOVE VERIFICATION
+
 # endregion USER VERIFICATION
 
 # region PASSWORD MANAGEMENT
@@ -244,7 +289,7 @@ class ResendActivationView(EmailMixin, LogMixin, View):
 # region PASSWORD RESET REQUEST
 class UserPasswordResetView(LogMixin, PasswordResetView):
     """Vista para solicitar el restablecimiento de contraseña."""
-    template_name = 'emails/pass_reset.html'
+    template_name = 'password/pass_reset.html'
     html_email_template_name = 'emails/pass_reset_email.html'
     email_template_name = 'emails/pass_reset_email_plain.txt'
     subject_template_name = 'emails/pass_reset_subject.txt'
@@ -270,7 +315,7 @@ class UserPasswordResetView(LogMixin, PasswordResetView):
 # region PASSWORD RESET REQUEST DONE
 class UserPasswordResetDoneView(PasswordResetDoneView):
     """Vista que confirma que el email ha sido enviado."""
-    template_name = 'emails/pass_reset_done.html'
+    template_name = 'password/pass_reset_done.html'
 
 
 # endregion PASSWORD RESET REQUEST DONE
@@ -279,7 +324,7 @@ class UserPasswordResetDoneView(PasswordResetDoneView):
 class UserPasswordResetConfirmView(LogMixin, PasswordResetConfirmView):
     """ Vista donde el usuario introduce su nueva contraseña """
 
-    template_name = 'emails/pass_reset_confirm.html'
+    template_name = 'password/pass_reset_confirm.html'
     form_class = CustomSetPasswordForm
     success_url = reverse_lazy('pass-reset-complete')
 
@@ -313,7 +358,7 @@ class UserPasswordResetConfirmView(LogMixin, PasswordResetConfirmView):
 # region PASSWORD RESET COMPLETE
 class UserPasswordResetCompleteView(PasswordResetCompleteView):
     """Vista que confirma que la contraseña se cambió con éxito."""
-    template_name = 'emails/pass_reset_complete.html'
+    template_name = 'password/pass_reset_complete.html'
 
 
 # endregion PASSWORD RESET COMPLETE
@@ -334,29 +379,24 @@ class SendEmailView(EmailMixin, FormView):
         return initial
 
     def form_valid(self, form):
-        # 1. Extraer datos del formulario (independientemente de si está logueado o no)
         form_username = form.cleaned_data.get('username')
         form_email = form.cleaned_data.get('email')
         subject = form.cleaned_data['subject']
         message = form.cleaned_data['message']
 
-        # 2. Determinar quién envía
+        # 1. Determinar quién envía
         if self.request.user.is_authenticated:
             user_data = self.request.user
         else:
-            # Validamos manualmente que existan si no hay sesión
-            if not form_username or not form_email:
-                messages.error(
-                    request=self.request,
-                    message="Por favor, introduce tu nombre y correo.",
-                    extra_tags='danger')
-                return self.form_invalid(form)
-
             UserContact = namedtuple('UserContact', ['username', 'email'])
             user_data = UserContact(username=form_username, email=form_email)
 
         try:
-            self.email(user_data, subject, message)
+            self.email(
+                email_from=user_data,
+                subject=subject,
+                message=message)
+
             messages.success(
                 request=self.request,
                 message="Tu mensaje ha sido enviado con éxito.",
@@ -376,42 +416,91 @@ class SendEmailView(EmailMixin, FormView):
 # region PROFILE
 
 # region PROFILE VIEW
-class ProfileView(View):
+class ProfileView(AccessMixin, LoginRequiredMixin, LogMixin, EmailMixin, View):
     template_name = 'accounts/profile.html'
 
     @staticmethod
     def get_target_user(request):
-        user_id = request.GET.get('id')
-        if user_id:
-            return get_object_or_404(CustomUser, id=user_id)
+        target_user_id = request.GET.get('id')
+
+        if target_user_id:
+            return get_object_or_404(CustomUser, id=target_user_id)
+
         return request.user
+
+    @staticmethod
+    def get_form(request, target_user):
+
+        data = request.POST if request.method == 'POST' else None
+
+        if request.user != target_user and request.user.has_perm('tesis.can_change_admin_data'):
+            return AdminUpdateForm(data, instance=target_user)
+
+        return UserUpdateForm(data, instance=target_user)
 
     def get(self, request):
         target_user = self.get_target_user(request)
-
-        user_fields = ['email', 'name', 'ci', 'location', 'phone_number', 'entity_type']
-        admin_fields = ['account_status', 'account_verified', 'role']
-
-        def get_display_data(fields):
-            data = []
-            for field_name in fields:
-                # 1. Try to get the label from the model field
-                try:
-                    label = CustomUser._meta.get_field(field_name).verbose_name.title()
-                except:
-                    # 2. Fallback for @property 'role' or other non-DB fields
-                    label = field_name.replace('_', ' ').title()
-
-                # 3. Get the value (works for both fields and @property)
-                value = getattr(target_user, field_name)
-                data.append({'label': label, 'value': value})
-            return data
+        form = self.get_form(request, target_user)
 
         context = {
-            'profile_user': target_user,
-            'user_data': get_display_data(user_fields),
-            'admin_data': get_display_data(admin_fields),
+            'target_user': target_user,
+            'form': form,
         }
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        target_user = self.get_target_user(request)
+        old_email = target_user.email
+        form = self.get_form(request, target_user)
+
+        # Lógica para la acción de eliminar
+        if request.GET.get('action') == 'delete':
+            target_user.is_active = False
+            target_user.save()
+            messages.success(request, f"Usuario {target_user.username} eliminado.")
+            return redirect('home')
+
+        if form.is_valid():
+            # 1. Check if the email is changing before saving
+            new_email = form.cleaned_data.get('email')
+
+            # 3. Compare the new value with the captured old value
+            email_changed = new_email and old_email != new_email
+
+            # 4. Save the form
+            form.save()
+
+            # 5. Handle the security notification if the email changed
+            if email_changed:
+                messages.info(
+                    request,
+                    f"Se ha enviado un correo de seguridad a su nueva dirección.",
+                    extra_tags='info'
+                )
+
+                self.system_email(
+                    user=target_user,
+                    subject="Cambio de correo de EcoCircular",
+                    template='emails/email_change.html',
+                    url_name='ver-remove'
+                )
+
+                self.log(
+                    user=target_user,
+                    event_type='SEC:CORREO_CAMBIO',
+                    details={'msj': 'Correo de confirmación de cambio enviado.'})
+
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True})
+
+            messages.success(request, "Perfil actualizado con éxito.")
+            return redirect(f"{request.path}?id={target_user.id}")
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+        # Fallback para peticiones normales
+        context = {'target_user': target_user, 'form': form}
         return render(request, self.template_name, context)
 
 
@@ -420,6 +509,7 @@ class ProfileView(View):
 
 # endregion PROFILE
 
+# region ERRORS
 
 class BaseErrorView(TemplateView):
     status_code = 400
@@ -446,6 +536,8 @@ class Custom404View(BaseErrorView):
 def custom_500_handler(request):
     return render(request, 'errors/error_500.html', status=500)
 
+
+# endregion ERRORS
 
 class TestView(View):
     template_name = 'test.html'
