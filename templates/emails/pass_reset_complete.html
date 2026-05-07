@@ -1,0 +1,41 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block body %}
+    <div class="bg-spots">
+        <div class="spot spot-green"></div>
+        <div class="spot spot-blue"></div>
+        <div class="spot spot-red"></div>
+    </div>
+
+    <div class="container vh-100 d-flex flex-column justify-content-center align-items-center" style="position: relative; z-index: 1;">
+
+        <div style="width: 100%; max-width: 500px;">
+            <div class="card glass-card border-0 shadow-lg text-center" style="border-radius: 15px;">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill text-green" style="font-size: 4rem; filter: drop-shadow(0 0 10px rgba(46, 125, 50, 0.3));"></i>
+                    </div>
+
+                    <h3 class="fw-bold mb-3">¡Contraseña Cambiada!</h3>
+
+                    <p class="opacity-75 mb-4 small">
+                        Tu contraseña ha sido actualizada con éxito. Ya puedes volver a utilizar tu cuenta de <strong>EcoCircular</strong>.
+                    </p>
+
+                    <div class="d-grid">
+                        <a href="{% url 'auth-login' %}" class="btn btn-green fw-bold shadow-sm py-2">
+                            Iniciar Sesión ahora
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-transparent border-top border-light border-opacity-10 py-3">
+                    <small class="opacity-50" style="font-size: 0.75rem;">
+                        Protegiendo tu identidad en la economía circular.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock body %}

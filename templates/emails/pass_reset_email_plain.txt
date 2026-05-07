@@ -1,0 +1,4 @@
+Hola {{ user.username }},
+Has solicitado restablecer tu contraseña en EcoCircular.
+Por favor, visita el siguiente enlace:
+{{ protocol }}://{{ domain }}{% url 'pass-reset-confirm' uidb64 = uid token = token %}
